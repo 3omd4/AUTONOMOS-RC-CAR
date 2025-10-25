@@ -1,4 +1,4 @@
-```
+
 // Arduino sketch that returns calibration offsets for MPU6050 
 //   Version 1.1  (31th January 2014)
 // Done by Luis Ródenas <luisrodenaslorda@gmail.com>
@@ -213,4 +213,4 @@ void calibration(){
     if (ready==6) break;
   }
 }
-```
+
