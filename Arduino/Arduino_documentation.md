@@ -10,19 +10,32 @@ It is based on the **MPU6050 calibration and control framework** developed by:
 ## 📁 Folder Structure
 
 Arduino/
+
 │
-├── Arduino_documentation.md # Additional project notes or documentation
-├── ROS_control_code/ # Final code used for ROS–Arduino communication
+
+├── Arduino_documentation.md       # Additional project notes or documentation
+
+├── ROS_control_code/              # Final code used for ROS–Arduino communication
+
 └── libraries/
-├──── I2Cdev/ # I2C communication driver
-├──── MPU6050/ # MPU6050 library and calibration examples
-│ ├── MPU_calibration/ # Code for calibrating sensor offsets and bias
-│ └── examples/
-│ ├── combined_code/ # Combined test for servo, DC motors, and encoder
-│ ├── IMU_Zero/ # Example for zeroing IMU offsets
-│ ├── MPU6050_DMP6/ # DMP-based IMU example using quaternion data
-│ └── MPU6050_raw/ # Raw accelerometer and gyroscope data example
-└──── Servo/ # Servo motor control library
+
+├─── I2Cdev/                       # I2C communication driver
+
+├─── MPU6050/                      # MPU6050 library and calibration examples
+
+│ ├────── MPU_calibration/         # Code for calibrating sensor offsets and bias
+
+│ └────── examples/
+
+│ ├──────── combined_code/         # Combined test for servo, DC motors, and encoder
+
+│ ├──────── IMU_Zero/              # Example for zeroing IMU offsets
+
+│ ├──────── MPU6050_DMP6/          # DMP-based IMU example using quaternion data
+
+│ └──────── MPU6050_raw/           # Raw accelerometer and gyroscope data example
+
+└──── Servo/                       # Servo motor control library
 
 ---
 
