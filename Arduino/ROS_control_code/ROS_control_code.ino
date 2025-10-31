@@ -1,13 +1,12 @@
-/* 
-  RC Car controller (using RosSerial).
+/* RC Car controller (using RosSerial).
   Arduino is considered as ROS Node { LOW level control }.
   This Node is a interface between Jetson , Motors , sensors . 
 
-  > Topic           - Msg                   - purpose 
+  > Topic         - Msg                 - purpose 
  
   > Subscribers :  
-  > /Cmd_Vel        - std_msgs/Float32   - Controlling DC Motor control For speed 
-  > /Cmd_Steering   - std_msgs/Float32   - Controlling The angle of servo For steering
+  > /Cmd_Vel        - std_msgs/Float32    - Controlling DC Motor control For speed 
+  > /Cmd_Steering   - std_msgs/Float32    - Controlling The angle of servo For steering
 
   > Publishers : 
   > /Encoder_Ticks  - std_msgs/Float32      - For encoder ticks 
@@ -21,7 +20,7 @@
 
 //-------------------------------------- libraries -----------------------------------
 
-#include <LiquidCrystal_I2C.h>
+// #include <LiquidCrystal_I2C.h> // <-- REMOVED
 #include <Servo.h>
 #include <ros.h>
 #include <std_msgs/Float32.h>
@@ -74,10 +73,8 @@ float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gra
 uint8_t teapotPacket[14] = { '$', 0x02, 0,0, 0,0, 0,0, 0,0, 0x00, 0x00, '\r', '\n' };
 
 const float GYRO_LSB_PER_DEG = 65.5f ;      // LSB per °/s for ±500 °/s (from datasheet)
-const float ACCEL_LSB_PER_G   = 4096.0f;    // LSB per g for ±8 g (from datasheet)
+const float ACCEL_LSB_PER_G  = 4096.0f;   // LSB per g for ±8 g (from datasheet)
 const float G_TO_MS2         = 9.80665f;    // g -> m/s^2
-const float DEG_TO_RAD       = 3.1416f / 180.0f;
-
 //-----------------------------------------------------------------------------------------
 
 // Pins
@@ -99,7 +96,7 @@ const int SLOTS_PER_REV = 20;
 const unsigned long RPM_INTERVAL_MS = 1000;
 
 // Objects
-LiquidCrystal_I2C lcd(0x27, 16, 2);
+// LiquidCrystal_I2C lcd(0x27, 16, 2); // <-- REMOVED
 Servo steeringServo;
 MPU6050 mpu;
 
@@ -110,7 +107,7 @@ std_msgs::Float32 ticks_msg;
 ros::Publisher ticks_pub("Encoder_Ticks", &ticks_msg);
 std_msgs::Float32 vel_msg;
 ros::Publisher velocity_pub("Velocity", &vel_msg);
-std_msgs::Imu imu_msg;
+sensor_msgs::Imu imu_msg;
 ros::Publisher imu_pub("Imu", &imu_msg);
 
 volatile unsigned long pulseCount = 0;
@@ -171,7 +168,7 @@ ros::Subscriber<std_msgs::Float32> cmd_steer_sub("cmd_steering", &cmdSteeringCal
 
 
 // =================================================================================================
-// ===============================                SETUP                       ======================
+// ===============================         SETUP                                   ======================
 // =================================================================================================
 
 void setup() {
@@ -186,15 +183,15 @@ void setup() {
     #endif
 
 
-  // LCD
-  lcd.init();
-  lcd.backlight();
-  lcd.setCursor(0, 0);
-  lcd.print(F("Arduino Ready .."));
+  // LCD // <-- REMOVED
+  // lcd.init();
+  // lcd.backlight();
+  // lcd.setCursor(0, 0);
+  // lcd.print(F("Arduino Ready .."));
 
   // Servo
   steeringServo.attach(SERVO_PIN);
-  steeringServo.write(SERVO_CENTER);   // set steering forward 
+  steeringServo.write(SERVO_CENTER);    // set steering forward 
 
   // Motor
   pinMode(MOTOR_ENA_PIN, OUTPUT);
@@ -206,28 +203,28 @@ void setup() {
   pinMode(IR_SENSOR_PIN, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(IR_SENSOR_PIN), countPulse, RISING);
 
-  // MPU
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print(F("initializing I2C"));
+  // MPU // <-- REMOVED
+  // lcd.clear();
+  // lcd.setCursor(0, 0);
+  // lcd.print(F("initializing I2C"));
   mpu.initialize();
 
-  // verifiy connection 
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print(F("Testing MPU"));
+  // verifiy connection  // <-- REMOVED
+  // lcd.clear();
+  // lcd.setCursor(0, 0);
+  // lcd.print(F("Testing MPU"));
 
   if (mpu.testConnection())
   {
-      lcd.setCursor(0, 1);
-      lcd.print(F("Connected"));   
+      // lcd.setCursor(0, 1); // <-- REMOVED
+      // lcd.print(F("Connected"));    // <-- REMOVED
       delay(1000); 
 
       }
   else 
-  {      
-      lcd.setCursor(0, 1);
-      lcd.print(F("Failed:("));  
+  {    
+      // lcd.setCursor(0, 1); // <-- REMOVED
+      // lcd.print(F("Failed:("));   // <-- REMOVED
       delay(1000); 
       }
 
@@ -237,9 +234,9 @@ void setup() {
   
   devStatus = mpu.dmpInitialize();
 
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print(F("Init DMP ..."));
+  // lcd.clear(); // <-- REMOVED
+  // lcd.setCursor(0, 0); // <-- REMOVED
+  // lcd.print(F("Init DMP ...")); // <-- REMOVED
   delay(500) ; 
 
 
@@ -252,37 +249,37 @@ void setup() {
   // make sure it worked (returns 0 if so)
   if (devStatus == 0) {
       // Calibration Time: generate offsets and calibrate our MPU6050
-      lcd.clear();
-      lcd.setCursor(0, 0);
-      lcd.print(F("Calibrating MPU"));
+      // lcd.clear(); // <-- REMOVED
+      // lcd.setCursor(0, 0); // <-- REMOVED
+      // lcd.print(F("Calibrating MPU")); // <-- REMOVED
       mpu.CalibrateAccel(6);
       mpu.CalibrateGyro(6);
       mpu.PrintActiveOffsets();
       // turn on the DMP, now that it's ready
       
-      lcd.clear();
-      lcd.setCursor(0, 0);
-      lcd.print(F("Enabling DMP"));
+      // lcd.clear(); // <-- REMOVED
+      // lcd.setCursor(0, 0); // <-- REMOVED
+      // lcd.print(F("Enabling DMP")); // <-- REMOVED
       mpu.setDMPEnabled(true);
 
       dmpReady = true;
       // get expected DMP packet size for later comparison
       packetSize = mpu.dmpGetFIFOPacketSize();
 
-      lcd.clear();
-      lcd.setCursor(0, 0);
-      lcd.print("DMP Ready!");
+      // lcd.clear(); // <-- REMOVED
+      // lcd.setCursor(0, 0); // <-- REMOVED
+      // lcd.print("DMP Ready!"); // <-- REMOVED
   } else {
       // ERROR!
       // 1 = initial memory load failed
       // 2 = DMP configuration updates failed
       // (if it's going to break, usually the code will be 1)
 
-      lcd.clear();
-      lcd.setCursor(0, 0);
-      lcd.print("DMP Failed!");
-      lcd.setCursor(0, 1);
-      lcd.print(devStatus);
+      // lcd.clear(); // <-- REMOVED
+      // lcd.setCursor(0, 0); // <-- REMOVED
+      // lcd.print("DMP Failed!"); // <-- REMOVED
+      // lcd.setCursor(0, 1); // <-- REMOVED
+      // lcd.print(devStatus); // <-- REMOVED
       delay(1000);
   }
 
@@ -294,21 +291,21 @@ void setup() {
   nh.subscribe(cmd_sub);
   nh.subscribe(cmd_steer_sub);
 
-  lcd.setCursor(0, 1);
-  lcd.print(F("ROS Ready!"));
+  // lcd.setCursor(0, 1); // <-- REMOVED
+  // lcd.print(F("ROS Ready!")); // <-- REMOVED
   delay(500);
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print(F("RPM: "));
-  lcd.setCursor(8, 0);
-  lcd.print(F("Vel: "));
-  lcd.setCursor(0, 1);
-  lcd.print(F("Yaw: "));
+  // lcd.clear(); // <-- REMOVED
+  // lcd.setCursor(0, 0); // <-- REMOVED
+  // lcd.print(F("RPM: ")); // <-- REMOVED
+  // lcd.setCursor(8, 0); // <-- REMOVED
+  // lcd.print(F("Vel: ")); // <-- REMOVED
+  // lcd.setCursor(0, 1); // <-- REMOVED
+  // lcd.print(F("Yaw: ")); // <-- REMOVED
 
 }
 
 // =================================================================================================
-// ===============================                LOOP                       ======================
+// ===============================         LOOP                                    ======================
 // =================================================================================================
 
 void loop() {
@@ -321,7 +318,7 @@ void loop() {
   if (mpu.dmpGetCurrentFIFOPacket(fifoBuffer)) { 
       // Get the Latest packet 
       mpu.dmpGetQuaternion(&q, fifoBuffer);
-      mpu.dmpGetGyro(&gy, fifoBuffer);    
+      mpu.dmpGetGyro(&gy, fifoBuffer);   
       mpu.dmpGetGravity(&gravity, &q);
       mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
       mpu.dmpGetAccel(&aa, fifoBuffer);
@@ -374,8 +371,8 @@ void loop() {
       // - Angular velocity covariance: small (gyro is relatively precise after scale choice)
       // - Linear acceleration covariance: larger (accelerometer noisy and affected by vibrations)
       for (int i = 0; i < 9; i++) {
-        imu_msg.orientation_covariance[i]        = 0.01;   // rad^2 (example)
-        imu_msg.angular_velocity_covariance[i]   = 0.001;  // (rad/s)^2
+        imu_msg.orientation_covariance[i]       = 0.01;   // rad^2 (example)
+        imu_msg.angular_velocity_covariance[i]  = 0.001;  // (rad/s)^2
         imu_msg.linear_acceleration_covariance[i]= 0.25;   // (m/s^2)^2
       }
 
@@ -402,20 +399,20 @@ void loop() {
     vel_msg.data = vel ;
     velocity_pub.publish(&vel_msg);
 
-    // Update LCD
-    lcd.setCursor(4, 0);
-    lcd.print(currentRpm, 1);
-    lcd.print("  ");
-    lcd.setCursor(13, 0);
-    lcd.print(vel, 2);
-    lcd.print("  ");
-    lcd.setCursor(5, 1);
-    lcd.print(ypr[0] * 180.0 / M_PI, 1);
-    lcd.print("  ");
+    // Update LCD // <-- REMOVED
+    // lcd.setCursor(4, 0);
+    // lcd.print(currentRpm, 1);
+    // lcd.print("  ");
+    // lcd.setCursor(13, 0);
+    // lcd.print(vel, 2);
+    // lcd.print("  ");
+    // lcd.setCursor(5, 1);
+    // lcd.print(ypr[0] * 180.0 / M_PI, 1);
+    // lcd.print("  ");
 
     lastRpmTime = now;
   }
 
   delay(50); // ~20Hz loop
-}
-
+  }
+  }
