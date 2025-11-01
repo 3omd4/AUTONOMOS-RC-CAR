@@ -57,15 +57,14 @@ std_msgs::Float32 vel_msg;
 ros::Publisher velocity_pub("Velocity", &vel_msg);
 
 volatile unsigned long pulseCount = 0;
-#define M_PI 3.1416
 unsigned long lastRpmTime = 0;
 
 float currentRpm = 0.0;
 float vel = 0.0;
 float target_speed = 0.0 ;
 
-float wheel_Dia = 0.064; // m
-float wheelCircumference = M_PI*wheel_Dia;
+const float wheel_Dia = 0.064; // m
+const float wheelCircumference = M_PI*wheel_Dia;
 
 float error = 0.0 ; 
 float last_error = 0.0 ; 
