@@ -3,11 +3,12 @@
   Arduino is considered as ROS Node { LOW level control }.
   This Node is a interface between Jetson , Motors , sensors . 
 
-  > Topic           - Msg                   - purpose 
+  > Topic           - Msg                           - purpose 
  
   > Subscribers :  
-  > /Cmd_Vel        - std_msgs/Float32   - Controlling DC Motor control For speed 
-  > /Cmd_Steering   - std_msgs/Float32   - Controlling The angle of servo For steering
+  > /Cmd_Vel        - std_msgs/Float32              - Controlling DC Motor control For speed 
+  > /Cmd_Steering   - std_msgs/Float32              - Controlling The angle of servo For steering
+  > /PID_Gains      - std_msgs/Float32MultiArray    - Taking the new Gains from jetson (kp & kd)
 
   > Publishers : 
   > /RPM            - std_msgs/Float32      - For encoder velocity
