@@ -21,6 +21,7 @@
 
 #include <LiquidCrystal_I2C.h>
 #include <Servo.h>
+#define ROSLIB_SERIAL_SIZE 32
 #include <ros.h>
 #include <std_msgs/Float32.h>
 #include <std_msgs/Float32MultiArray.h>
@@ -30,19 +31,19 @@
 //-----------------------------------------------------------------------------------------
 
 // Pins
-const int IR_SENSOR_PIN = 2;  // Interrupt for encoder
-const int MOTOR_ENA_PIN = 3;  // Digital pin > PWM  
-const int MOTOR_IN1_PIN = 5;  // Digital pin
-const int MOTOR_IN2_PIN = 6;  // Digital pin
-const int SERVO_PIN = 9;      // Digital pin > PWM  (send angle direct)
+const uint8_t IR_SENSOR_PIN = 2;  // Interrupt for encoder
+const uint8_t MOTOR_ENA_PIN = 3;  // Digital pin > PWM  
+const uint8_t MOTOR_IN1_PIN = 5;  // Digital pin
+const uint8_t MOTOR_IN2_PIN = 6;  // Digital pin
+const uint8_t SERVO_PIN = 9;      // Digital pin > PWM  (send angle direct)
 
 // Servo limits
-const int SERVO_MIN = 78;     
-const int SERVO_CENTER = 90;
-const int SERVO_MAX = 102;
+const uint8_t SERVO_MIN = 78;     
+const uint8_t SERVO_CENTER = 90;
+const uint8_t SERVO_MAX = 102;
 
 // Encoder
-const int SLOTS_PER_REV = 20;
+const uint8_t SLOTS_PER_REV = 20;
 
 // Publishing intervals
 const unsigned long RPM_INTERVAL_MS = 1000;
@@ -54,7 +55,7 @@ Servo steeringServo;
 // ROS Topics and Publisher
 ros::NodeHandle nh;
 std_msgs::Float32 vel_msg;
-ros::Publisher velocity_pub("Velocity", &vel_msg);
+ros::Publisher velocity_pub("Vel", &vel_msg);
 
 volatile unsigned long pulseCount = 0;
 unsigned long lastRpmTime = 0;
@@ -130,9 +131,9 @@ void cmdSteeringCallback(const std_msgs::Float32& steering_cmd) {
   setSteering(servo_angle);
 }
 
-ros::Subscriber<std_msgs::Float32MultiArray> cmd_pid_sub("PID_Gains", &PIDGainsCallback);
+ros::Subscriber<std_msgs::Float32MultiArray> cmd_pid_sub("pid", &PIDGainsCallback);
 ros::Subscriber<std_msgs::Float32> cmd_vel_sub("cmd_vel", &cmdVelCallback);
-ros::Subscriber<std_msgs::Float32> cmd_steer_sub("cmd_steering", &cmdSteeringCallback);
+ros::Subscriber<std_msgs::Float32> cmd_steer_sub("cmd_steer", &cmdSteeringCallback);
 
 
 // =================================================================================================
