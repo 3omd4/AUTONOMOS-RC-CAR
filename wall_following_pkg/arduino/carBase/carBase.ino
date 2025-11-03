@@ -18,10 +18,7 @@
 */
 
 //-------------------------------------- libraries -----------------------------------
-
-#include <LiquidCrystal_I2C.h>
 #include <Servo.h>
-#define ROSLIB_SERIAL_SIZE 32
 #include <ros.h>
 #include <std_msgs/Float32.h>
 #include <std_msgs/Float32MultiArray.h>
@@ -49,7 +46,6 @@ const uint8_t SLOTS_PER_REV = 20;
 const unsigned long RPM_INTERVAL_MS = 1000;
 
 // Objects
-LiquidCrystal_I2C lcd(0x27, 16, 2);
 Servo steeringServo;
 
 // ROS Topics and Publisher
@@ -131,9 +127,9 @@ void cmdSteeringCallback(const std_msgs::Float32& steering_cmd) {
   setSteering(servo_angle);
 }
 
-ros::Subscriber<std_msgs::Float32MultiArray> cmd_pid_sub("pid", &PIDGainsCallback);
-ros::Subscriber<std_msgs::Float32> cmd_vel_sub("cmd_vel", &cmdVelCallback);
-ros::Subscriber<std_msgs::Float32> cmd_steer_sub("cmd_steer", &cmdSteeringCallback);
+ros::Subscriber<std_msgs::Float32MultiArray> cmd_pid_sub("/pid", &PIDGainsCallback);
+ros::Subscriber<std_msgs::Float32> cmd_vel_sub("/cmd_vel", &cmdVelCallback);
+ros::Subscriber<std_msgs::Float32> cmd_steer_sub("/cmd_steer", &cmdSteeringCallback);
 
 
 // =================================================================================================
@@ -144,13 +140,6 @@ void setup() {
   Serial.begin(57600); // Works reliably with Uno Rosserial
   Wire.begin();
        
-
-  // LCD
-  lcd.init();
-  lcd.backlight();
-  lcd.setCursor(0, 0);
-  lcd.print(F("Arduino Ready .."));
-
   // Servo
   steeringServo.attach(SERVO_PIN);
   steeringServo.write(SERVO_CENTER);   // set steering forward 
@@ -171,17 +160,6 @@ void setup() {
   nh.subscribe(cmd_vel_sub);
   nh.subscribe(cmd_steer_sub);
   nh.subscribe(cmd_pid_sub);
-
-  lcd.setCursor(0, 1);
-  lcd.print(F("ROS Ready!"));
-  delay(500);
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print(F("PWM: "));
-  lcd.setCursor(8, 0);
-  lcd.print(F("RPM: "));
-  lcd.setCursor(0, 1);
-  lcd.print(F("Vel: "));
   
   lastPidtime = millis();
   lastRpmTime = millis();
@@ -228,18 +206,5 @@ void loop() {
   last_error = error ; 
   lastPidtime = now ;
 
-  // Update LCD
-  lcd.setCursor(4, 0);
-  lcd.print(currentRpm, 1);
-  lcd.print("  ");
-  lcd.setCursor(13, 0);
-  lcd.print(vel, 2);
-  lcd.print("  ");
-  lcd.setCursor(5, 1);
-  lcd.print(motor_PWM );
-  lcd.print("  ");
-
-
   delay(50); // ~20Hz loop
 }
-
