@@ -18,7 +18,12 @@
 */
 
 //-------------------------------------- libraries -----------------------------------
+
+#include "I2Cdev.h"
+#include "MPU6050.h"
+#include <LiquidCrystal_I2C.h>
 #include <Servo.h>
+#define ROSLIB_SERIAL_SIZE 32
 #include <ros.h>
 #include <std_msgs/Float32.h>
 #include <std_msgs/Float32MultiArray.h>
@@ -44,6 +49,12 @@ const uint8_t SLOTS_PER_REV = 20;
 
 // Publishing intervals
 const unsigned long RPM_INTERVAL_MS = 1000;
+
+// MPU 
+MPU6050 accelgyro;
+int16_t ax, ay, az;
+int16_t gx, gy, gz;
+#define OUTPUT_READABLE_ACCELGYRO
 
 // Objects
 Servo steeringServo;
@@ -154,12 +165,21 @@ void setup() {
   pinMode(IR_SENSOR_PIN, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(IR_SENSOR_PIN), countPulse, RISING);
 
+  // MPU 
+  accelgyro.initialize();
+  accelgyro.setXGyroOffset(163);
+  accelgyro.setYGyroOffset(28);
+  accelgyro.setZGyroOffset(50);
+  accelgyro.setZAccelOffset(1252); 
+ 
   // ROS
   nh.initNode();
   nh.advertise(velocity_pub);
   nh.subscribe(cmd_vel_sub);
   nh.subscribe(cmd_steer_sub);
   nh.subscribe(cmd_pid_sub);
+
+  delay(500);
   
   lastPidtime = millis();
   lastRpmTime = millis();
@@ -206,5 +226,8 @@ void loop() {
   last_error = error ; 
   lastPidtime = now ;
 
+  accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+
   delay(50); // ~20Hz loop
 }
+
