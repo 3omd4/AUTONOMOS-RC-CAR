@@ -1,13 +1,13 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 import rospy
 from sensor_msgs.msg import LaserScan
-from std_msgs.msg import Float32, Float32MultiArray
+from std_msgs.msg import Float32
 import math
 
 # =================== CONFIG ===================
 TARGET_DIST = 0.4          # desired distance from right wall (m)
-KP_DIST = 200.0            # gain for steering control
-BASE_SPEED = 0.8           # desired forward speed (m/s)
+KP_DIST = 200.0         # gain for steering control
+BASE_SPEED = 180.0           # desired forward speed (pwm)
 SCAN_RIGHT_START = -100.0  # degrees
 SCAN_RIGHT_END = -60.0     # degrees
 # ==============================================
@@ -18,17 +18,11 @@ class WallFollower:
         rospy.init_node("right_wall_follower", anonymous=True)
 
         # Publishers to Arduino node
-        self.vel_pub = rospy.Publisher("/cmd_vel", Float32, queue_size=10)
+        self.vel_pub = rospy.Publisher("/cmd_pwm", Float32, queue_size=10)
         self.steer_pub = rospy.Publisher("/cmd_steer", Float32, queue_size=10)
-        self.pid_pub = rospy.Publisher("/pid", Float32MultiArray, queue_size=10)
 
         # Subscribe to LiDAR
         rospy.Subscriber("/scan", LaserScan, self.lidar_callback)
-
-        # Optional: send PID gains (set if you want dynamic PID tuning)
-        pid_msg = Float32MultiArray()
-        pid_msg.data = [1.0, 0.2]   # kp, kd
-        self.pid_pub.publish(pid_msg)
 
         rospy.loginfo("Wall follower node started.")
         rospy.spin()
@@ -49,8 +43,8 @@ class WallFollower:
         error = avg_right - TARGET_DIST  # positive if too far from wall
 
         # Compute steering correction
-        steer_angle = 90 + KP_DIST * error
-        steer_angle = max(78, min(102, steer_angle))  # clip to servo limits
+        steer_angle = 95 + KP_DIST * error
+        steer_angle = max(78, min(112, steer_angle))  # clip to servo limits
 
         # Publish control commands
         vel_msg = Float32()
@@ -62,7 +56,7 @@ class WallFollower:
         self.vel_pub.publish(vel_msg)
         self.steer_pub.publish(steer_msg)
 
-        rospy.loginfo_throttle(0.5, f"RightDist={avg_right:.2f} | Err={error:.2f} | Servo={steer_angle:.1f}")
+        print(f"RightDist= ",avg_right,  "| Err= ", error, "| Servo= ", steer_angle)
 
 
 if __name__ == "__main__":
