@@ -1,0 +1,32 @@
+<launch>
+
+    <!-- ================= RPLIDAR ================= -->
+    <include file="$(find rplidar_ros)/launch/rplidar_a2m12.launch">
+    </include>
+
+    <!-- ================= WALL FOLLOWING ================= -->
+
+    <!-- Choose ONE mode at a time -->
+    <!-- RIGHT wall -->
+    <node pkg="atheer_control"
+          type="wall_follow_right.py"
+          name="wall_follow_right"
+          output="screen" />
+
+    <!-- LEFT wall (comment out if not used) -->
+    <!--
+    <node pkg="atheer_control"
+          type="wall_follow_left.py"
+          name="wall_follow_left"
+          output="screen" />
+    -->
+
+    <!-- CENTER wall (comment out if not used) -->
+    <!--
+    <node pkg="atheer_control"
+          type="wall_follow_center.py"
+          name="wall_follow_center"
+          output="screen" />
+    -->
+
+</launch>

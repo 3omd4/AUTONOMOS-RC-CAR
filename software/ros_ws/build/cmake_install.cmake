@@ -131,7 +131,7 @@ endif()
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
   include("/home/amsport/AUTONOMOS-RC-CAR/software/ros_ws/build/gtest/cmake_install.cmake")
-  include("/home/amsport/AUTONOMOS-RC-CAR/software/ros_ws/build/Atheer_control/cmake_install.cmake")
+  include("/home/amsport/AUTONOMOS-RC-CAR/software/ros_ws/build/atheer_control/cmake_install.cmake")
   include("/home/amsport/AUTONOMOS-RC-CAR/software/ros_ws/build/rplidar_ros/cmake_install.cmake")
 
 endif()

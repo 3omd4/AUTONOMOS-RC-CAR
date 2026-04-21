@@ -15,10 +15,10 @@
 ########################
 
 //Value Computed by CMake
-Atheer_control_BINARY_DIR:STATIC=/home/amsport/AUTONOMOS-RC-CAR/software/ros_ws/build/Atheer_control
+Atheer_control_BINARY_DIR:STATIC=/home/amsport/AUTONOMOS-RC-CAR/software/ros_ws/build/atheer_control
 
 //Value Computed by CMake
-Atheer_control_SOURCE_DIR:STATIC=/home/amsport/AUTONOMOS-RC-CAR/software/ros_ws/src/Atheer_control
+Atheer_control_SOURCE_DIR:STATIC=/home/amsport/AUTONOMOS-RC-CAR/software/ros_ws/src/atheer_control
 
 //Builds the googlemock subproject
 BUILD_GMOCK:BOOL=ON
@@ -289,6 +289,12 @@ _gtest_INCLUDES:FILEPATH=/usr/include/gtest/gtest.h
 
 //Path to a file.
 _gtest_SOURCES:FILEPATH=/usr/src/gtest/src/gtest.cc
+
+//Value Computed by CMake
+atheer_control_BINARY_DIR:STATIC=/home/amsport/AUTONOMOS-RC-CAR/software/ros_ws/build/atheer_control
+
+//Value Computed by CMake
+atheer_control_SOURCE_DIR:STATIC=/home/amsport/AUTONOMOS-RC-CAR/software/ros_ws/src/atheer_control
 
 //Value Computed by CMake
 atheer_perception_BINARY_DIR:STATIC=/home/amsport/AUTONOMOS-RC-CAR/software/ros_ws/build/atheer_perception

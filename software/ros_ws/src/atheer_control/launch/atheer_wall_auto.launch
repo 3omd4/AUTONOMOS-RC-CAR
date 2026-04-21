@@ -1,0 +1,19 @@
+<launch>
+
+    <!-- ================= LIDAR ================= -->
+    <include file="$(find rplidar_ros)/launch/rplidar.launch">
+        <arg name="serial_port" value="/dev/ttyUSB0"/>
+        <arg name="serial_baudrate" value="256000"/>
+        <arg name="frame_id" value="laser"/>
+        <arg name="inverted" value="false"/>
+        <arg name="angle_compensate" value="true"/>
+    </include>
+
+    <!-- ================= WALL FOLLOWER ================= -->
+    <node pkg="atheer_control"
+          type="right_wall_follower.py"
+          name="wall_follower"
+          output="screen">
+    </node>
+
+</launch>

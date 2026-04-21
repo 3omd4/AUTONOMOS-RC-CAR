@@ -1,0 +1,8 @@
+prefix=/home/amsport/AUTONOMOS-RC-CAR/software/ros_ws/devel
+
+Name: atheer_control
+Description: Description of atheer_control
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 
