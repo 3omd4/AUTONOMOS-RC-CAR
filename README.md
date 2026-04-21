@@ -1,55 +1,69 @@
 🏎️ AUTONOMOUS RC CAR (Atheer Control)
-This repository contains the software and hardware integration for an autonomous RC car. The system uses a 2D LiDAR for perception, a Jetson/Ubuntu machine running ROS 1 for path planning (wall-following), and an ESP-32 microcontroller communicating via Bluetooth Classic to drive the motors and servo.
+This repository contains the software and hardware integration for an autonomous wall-following RC car. The system uses a 2D RPLidar for perception, a Jetson/Ubuntu machine running ROS 1 Melodic for path planning, and an ESP-32 microcontroller communicating via Bluetooth Classic to drive the motors and steering servo.
 
-🛠️ System Architecture
-Perception: RPLidar node publishes /scan data to ROS.
+📋 System Prerequisites
+Brain: Ubuntu machine (Jetson Nano, laptop, or Raspberry Pi) running ROS 1 Melodic.
 
-Control: Python wall-following nodes (wall_follow_right.py, etc.) calculate distance and error, publishing scaling percentages (-100 to 100) to /cmd_steer and /cmd_pwm.
+Muscle: ESP32 Microcontroller.
 
-Bridge: A serial bridge script formats the ROS topic data into strings and sends them to the ESP32 over Bluetooth.
+Sensors/Actuators: RPLidar (A1/A2), Standard Steering Servo, DC Motor with L298N Motor Driver, MPU6050 IMU.
 
-Hardware (ESP32): Receives the string CMD:<steer>,<throttle>, calculates the exact raw servo angles and L298N motor driver PWM, and applies the physical outputs. It also reads an MPU6050 IMU to estimate speed and yaw.
+🛠️ Step 1: ESP32 Hardware Setup & Flashing
+The ESP32 acts as the low-level hardware driver. It receives percentage-based commands (-100 to 100) from ROS and maps them to physical PWM signals.
 
-📦 Step 1: ESP32 Hardware Setup
-Wiring:
+Hardware Wiring:
 
 Servo Motor (Steering): Signal -> GPIO 16
 
-L298N (DC Motor): IN1 -> GPIO 25, IN2 -> GPIO 33, ENA -> GPIO 12
+L298N (DC Motor): IN1 -> GPIO 25 | IN2 -> GPIO 33 | ENA -> GPIO 12
 
-MPU6050 (IMU): SDA -> GPIO 21, SCL -> GPIO 22
+MPU6050 (IMU): SDA -> GPIO 21 | SCL -> GPIO 22
 
-Flash the ESP32:
+Flash the Firmware:
 
 Open software/ESP-32/Atheer_RC.ino in the Arduino IDE.
 
-Ensure you have the ESP32Servo library installed.
+Ensure you have the ESP32Servo library installed via the Library Manager.
 
-Select your ESP32 board and flash the code.
+Select your ESP32 board, select the COM port, and upload the code.
 
-Open the Serial Monitor at 115200 baud. You should see [ESP32_Atheer] Booting... and [BT] Ready. Waiting for connection....
+Open the Serial Monitor (115200 baud) to verify it boots and says [BT] Ready. Waiting for connection....
 
-💻 Step 2: Bluetooth Pairing (Ubuntu/Jetson)
-Because the ESP32 uses Bluetooth Classic SPP (Serial Port Profile), you must bind it to a Linux serial port so ROS can write to it like a USB cable.
+📡 Step 2: Bluetooth Pairing & Binding (Ubuntu/Jetson)
+Because the ESP32 uses Bluetooth Classic SPP (Serial Port Profile), you must bind it to a Linux serial port so ROS can communicate with it like a standard USB device.
 
-Turn on the ESP32.
+1. Pair the Device:
+Open a terminal and run the Bluetooth configuration tool:
 
-Go to your Ubuntu Bluetooth settings and pair with the device named ESP32_Atheer.
+Bash
+bluetoothctl
+Inside the prompt, type the following commands:
 
-Find the MAC address of the ESP32 (you can find this in the Bluetooth settings, format XX:XX:XX:XX:XX:XX).
-
-Bind the Bluetooth device to a serial port by opening a terminal and running:
+Bash
+scan on
+# Wait until you see a device named "ESP32_Atheer" and copy its MAC address (e.g., AA:BB:CC:DD:EE:FF)
+scan off
+pair <YOUR_ESP32_MAC_ADDRESS>
+trust <YOUR_ESP32_MAC_ADDRESS>
+exit
+2. Bind the RFCOMM Port:
+Tell Ubuntu to create a virtual serial port linked to your ESP32. (Note: You must run this command every time you reboot the Jetson or power-cycle the ESP32).
 
 Bash
 sudo rfcomm bind 0 <YOUR_ESP32_MAC_ADDRESS>
-This creates a serial port at /dev/rfcomm0.
+3. Grant Permissions:
+Give ROS permission to read and write to the newly created Bluetooth port:
 
+Bash
+sudo chmod 666 /dev/rfcomm0
 ⚙️ Step 3: ROS Workspace Setup
+Compile the autonomy stack and ensure all Python scripts are executable.
+
 Open a terminal and navigate to your ROS workspace:
 
 Bash
-cd software/ros_ws
-Make sure all your Python scripts are executable:
+cd ~/AUTONOMOS-RC-CAR/software/ros_ws
+Make sure all Python nodes (including the Bluetooth bridge) have executable permissions:
 
 Bash
 chmod +x src/atheer_control/src/*.py
@@ -61,36 +75,38 @@ Source the setup file:
 
 Bash
 source devel/setup.bash
-(Tip: Add source ~/AUTONOMOS-RC-CAR/software/ros_ws/devel/setup.bash to your ~/.bashrc so you don't have to run it every time).
-
 🚀 Step 4: Running the Autonomy Stack
-You need to run four separate processes. Open a new terminal tab for each (remembering to run source devel/setup.bash in each new tab).
+With the hardware powered on and the Bluetooth port bound, you can bring up the entire system with a single launch file.
 
-Terminal 1: Start ROS Master
-
-Bash
-roscore
-Terminal 2: Start the LiDAR
+Ensure your RPLidar has USB permissions:
 
 Bash
-# Provide permissions to the USB port first
 sudo chmod 666 /dev/ttyUSB0
-rosrun rplidar_ros rplidarNode
-(Note: If you have a launch file for your lidar, use roslaunch rplidar_ros rplidar.launch instead).
-
-Terminal 3: Start the Bluetooth Bridge
-Make sure you created the bt_bridge.py script we discussed previously to translate ROS topics into the string format the ESP32 expects.
+Launch the LiDAR, Wall Follower, and Bluetooth Bridge simultaneously:
 
 Bash
-rosrun atheer_control bt_bridge.py _port:=/dev/rfcomm0
-Terminal 4: Start the Wall Follower Algorithm
-Place the car on the track next to the right wall, then run:
+roslaunch atheer_control atheer_autonomy.launch
+(By default, atheer_autonomy.launch is configured to run wall_follow_right.py. You can edit the launch file to switch to left-wall or center-wall following).
 
-Bash
-rosrun atheer_control wall_follow_right.py
-🐞 Troubleshooting
-Car drives straight into the wall / Doesn't turn: Check that the requested lidar angle in your Python code matches the RPLidar's frame. If the Lidar publishes 0 to 2π, ensure your Python node isn't requesting -45 degrees without normalizing it first.
+🐞 Common Troubleshooting
+Error: [Errno 2] No such file or directory: '/dev/rfcomm0'
 
-Bluetooth Bridge fails to connect: Ensure you ran the sudo rfcomm bind 0 command. If it says "Device or resource busy", run sudo rfcomm release 0 and try again.
+Cause: The Bluetooth serial port was not created.
 
-Car steering is inverted: In wall_follower_base.py, swap the signs on your steering output, or on the ESP32, swap SERVO_MIN and SERVO_MAX inside applySteeringCommand().
+Fix: Ensure the ESP32 is powered on, then run sudo rfcomm bind 0 <MAC_ADDRESS> and grant permissions with sudo chmod 666 /dev/rfcomm0.
+
+Error: ModuleNotFoundError: No module named 'rospkg' or 'serial'
+
+Cause: Python environment mismatch. ROS Melodic defaults to Python 2.7, but your scripts might be forcing Python 3 (#!/usr/bin/env python3).
+
+Fix: Either change the top line of your Python scripts to #!/usr/bin/env python, OR install the Python 3 ROS tools (sudo apt install python3-pip && pip3 install rospkg defusedxml pyserial).
+
+The car drives straight into the wall / doesn't turn:
+
+Cause: Lidar coordinate frame mismatch.
+
+Fix: Ensure the get_range function in wall_follower_base.py is correctly normalizing negative angles (e.g., -45 degrees) to the Lidar's 0 to 2π or -π to π coordinate space.
+
+The steering is inverted (steers toward the wall instead of away):
+
+Fix: Open wall_follower_base.py and invert the sign on your control error calculation, or open the ESP32 code and swap the SERVO_MIN and SERVO_MAX values.
