@@ -1,0 +1,18 @@
+# ROS build artifacts
+software/ros_ws/build/
+software/ros_ws/devel/
+software/ros_ws/logs/
+
+# Python
+__pycache__/
+*.pyc
+
+# System
+.DS_Store
+
+# Data
+data/*
+
+# ROS logs
+*.bag
+*.bag.active
