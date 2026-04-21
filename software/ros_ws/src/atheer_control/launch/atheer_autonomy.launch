@@ -7,11 +7,11 @@
     <!-- ================= WALL FOLLOWING ================= -->
 
     <!-- Choose ONE mode at a time -->
-    <!-- RIGHT wall -->
+    <!-- RIGHT wall 
     <node pkg="atheer_control"
           type="wall_follow_right.py"
           name="wall_follow_right"
-          output="screen" />
+          output="screen" /> -->
 
     <!-- LEFT wall (comment out if not used) -->
     <!--
@@ -22,11 +22,16 @@
     -->
 
     <!-- CENTER wall (comment out if not used) -->
-    <!--
     <node pkg="atheer_control"
           type="wall_follow_center.py"
           name="wall_follow_center"
           output="screen" />
-    -->
-
+    
+      <node pkg="atheer_control"
+          type="bt_bridge.py"
+          name="bluetooth_bridge"
+          output="screen">
+        <param name="port" value="/dev/rfcomm0" />
+        <param name="baud" value="115200" />
+    </node>
 </launch>
