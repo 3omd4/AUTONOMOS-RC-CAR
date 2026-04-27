@@ -10,7 +10,9 @@
  *    MPU6050 SDA   → GPIO 21
  *    MPU6050 SCL   → GPIO 22
  *
- *  Bluetooth: Classic SPP  →  device name "ESP32_Atheer"
+ *  Communication:
+ *   Serial (USB) at 115200 baud for commands & telemetry
+ *  (Optional) BluetoothSerial for wireless control — not implemented in this version
  *
  *  Packet format (commands FROM laptop):
  *    CMD:<steering>,<throttle>\n
@@ -26,13 +28,12 @@
  *
  *  Required libraries (install via Arduino Library Manager):
  *    - ESP32Servo      by Kevin Harrington
- *    - BluetoothSerial (built-in with ESP32 Arduino core)
  *    - Wire.h          (built-in — no install needed)
+ *   - (Optional) BluetoothSerial by Neil Kolban — not implemented in this version
  * ============================================================
  */
 
 // ── Libraries ────────────────────────────────────────────────
-#include "BluetoothSerial.h"
 #include <ESP32Servo.h>
 #include <Wire.h>
 
@@ -73,9 +74,6 @@
 // ── Telemetry ────────────────────────────────────────────────
 #define TELEMETRY_INTERVAL_MS  200
 
-// ── Bluetooth ────────────────────────────────────────────────
-BluetoothSerial BT;
-
 // ── Servo ────────────────────────────────────────────────────
 Servo steeringServo;
 
@@ -87,8 +85,8 @@ unsigned long lastImuTime = 0;
 // ── Telemetry timer ──────────────────────────────────────────
 unsigned long lastTelemetryTime = 0;
 
-// ── Incoming BT buffer ───────────────────────────────────────
-String btBuffer = "";
+// ── Incoming serial buffer ───────────────────────────────────────
+String Buffer = "";
 
 // ============================================================
 //  SETUP
@@ -96,13 +94,6 @@ String btBuffer = "";
 void setup() {
   Serial.begin(115200);
   Serial.println("[ESP32_Atheer] Booting...");
-
-  // ── Bluetooth ────────────────────────────────────────────
-  if (!BT.begin("ESP32_Atheer")) {
-    Serial.println("[BT] Failed to initialise Bluetooth!");
-  } else {
-    Serial.println("[BT] Ready. Waiting for connection...");
-  }
 
   // ── Servo ────────────────────────────────────────────────
   ESP32PWM::allocateTimer(0);   // allocate hardware timer for servo
@@ -152,8 +143,8 @@ void setup() {
 //  LOOP
 // ============================================================
 void loop() {
-  // 1. Read & process incoming Bluetooth commands
-  readBluetooth();
+  // 1. Read & process incoming serial commands
+  readSerial();
 
   // 2. Update IMU estimates
   updateIMU();
@@ -167,19 +158,19 @@ void loop() {
 }
 
 // ============================================================
-//  BLUETOOTH — read incoming data line by line
+//  SERIAL — read incoming data line by line
 // ============================================================
-void readBluetooth() {
-  while (BT.available()) {
-    char c = (char)BT.read();
+void readSerial() {
+  while (Serial.available()) {
+    char c = (char)Serial.read();
     if (c == '\n') {
-      btBuffer.trim();
-      if (btBuffer.length() > 0) {
-        decodeCommand(btBuffer);
+      Buffer.trim();
+      if (Buffer.length() > 0) {
+        decodeCommand(Buffer);
       }
-      btBuffer = "";
+      Buffer = "";
     } else {
-      btBuffer += c;
+      Buffer += c;
     }
   }
 }
@@ -332,12 +323,7 @@ void updateIMU() {
 //  ENCODE & SEND telemetry — "STAT:<speed>,<yaw>\n"
 // ============================================================
 void sendTelemetry() {
-  if (!BT.connected()) return;
-
   char packet[64];
   snprintf(packet, sizeof(packet), "STAT:%.2f,%.2f\n", speed_ms, yaw_deg);
-  BT.print(packet);
-
-  Serial.print("[TELEM] Sent: ");
   Serial.print(packet);
 }
