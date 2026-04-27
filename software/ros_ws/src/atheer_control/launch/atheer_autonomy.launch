@@ -1,7 +1,7 @@
 <launch>
 
     <!-- ================= RPLIDAR ================= -->
-    <include file="$(find rplidar_ros)/launch/rplidar_a2m12.launch">
+    <include file="$(find rplidar_ros)/launch/rplidar_a1m8.launch">
     </include>
 
     <!-- ================= WALL FOLLOWING ================= -->
