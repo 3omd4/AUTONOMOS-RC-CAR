@@ -60,8 +60,8 @@
 
 // ── Servo Configuration ───────────────────────────────────────
 #define SERVO_CENTER  90   // degrees — straight ahead
-#define SERVO_MIN     78   // degrees — full left
-#define SERVO_MAX     105  // degrees — full right
+#define SERVO_MIN     61   // degrees — full left
+#define SERVO_MAX     117  // degrees — full right
 #define SERVO_PULSE_MIN  500   // µs
 #define SERVO_PULSE_MAX  2500  // µs
 
