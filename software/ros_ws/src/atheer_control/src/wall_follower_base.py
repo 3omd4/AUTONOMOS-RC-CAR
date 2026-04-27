@@ -44,7 +44,7 @@ class WallFollowerBase:
     def callback(self, msg):
         error = self.compute_error(msg)
 
-        steer = self.STEER_CENTER + self.KP * error
+        steer = self.STEER_CENTER - self.KP * error
         steer = max(self.STEER_MIN, min(self.STEER_MAX, steer))
 
         self.vel_pub.publish(Float32(self.BASE_SPEED))
